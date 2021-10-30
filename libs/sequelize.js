@@ -1,13 +1,19 @@
 const { Sequelize } = require('sequelize');
 
-const { dbHost, dbPort, dbUser, dbPassword, dbName } = require('../config');
+const { isProd, dbUrl } = require('../config');
 const setupModels = require('../db/models');
 
-const uri = `mysql://${dbUser}:${dbPassword}@${dbHost}:${dbPort}/${dbName}`;
+const options = {
+  dialect: isProd ? 'postgres' : 'mysql',
+};
+if (isProd) {
+  options.ssl = {
+    rejectUnauthorized: false,
+  };
+  options.logging = false;
+}
 
-const sequelize = new Sequelize(uri, {
-  dialect: 'mysql',
-});
+const sequelize = new Sequelize(dbUrl, options);
 
 setupModels(sequelize);
 

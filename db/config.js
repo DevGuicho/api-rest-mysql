@@ -1,14 +1,15 @@
-const { dbHost, dbPort, dbUser, dbPassword, dbName } = require('../config');
-
-const uri = `mysql://${dbUser}:${dbPassword}@${dbHost}:${dbPort}/${dbName}`;
+const { dbUrl } = require('../config');
 
 module.exports = {
   development: {
-    url: uri,
+    url: dbUrl,
     dialect: 'mysql',
   },
   production: {
-    url: uri,
-    dialect: 'mysql',
+    url: dbUrl,
+    dialect: 'postgres',
+    ssl: {
+      rejectUnauthorized: false,
+    },
   },
 };
