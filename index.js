@@ -1,29 +1,33 @@
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
+const express = require('express')
+const cors = require('cors')
+const helmet = require('helmet')
+const passport = require('passport')
 
-const { port } = require('./config');
+const { port } = require('./config')
 const {
   errorHandler,
   logErrors,
   wrapErrors,
-  ormErrorHandler,
-} = require('./middlewares/error.handler');
-const routerApi = require('./routes');
-const notFoundHandler = require('./middlewares/notFound.handler');
-const app = express();
+  ormErrorHandler
+} = require('./middlewares/error.handler')
+const routerApi = require('./routes')
+const notFoundHandler = require('./middlewares/notFound.handler')
+const app = express()
 
-app.use(cors());
-app.use(helmet());
-app.use(express.json());
+app.use(cors())
+app.use(helmet())
+app.use(passport.initialize())
+app.use(express.json())
 
-routerApi(app);
+require('./utils/auth')
 
-app.use(notFoundHandler);
+routerApi(app)
 
-app.use(logErrors);
-app.use(ormErrorHandler);
-app.use(wrapErrors);
-app.use(errorHandler);
+app.use(notFoundHandler)
 
-app.listen(port, () => console.log(`Server running on port ${port}`));
+app.use(ormErrorHandler)
+app.use(wrapErrors)
+app.use(logErrors)
+app.use(errorHandler)
+
+app.listen(port, () => console.log(`Server running on port ${port}`))

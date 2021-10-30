@@ -1,6 +1,6 @@
 {
   "parserOptions": {
-    "ecmaVersion": 2018
+    "ecmaVersion": "latest"
   },
   "extends": ["eslint:recommended", "prettier"],
   "env": {
