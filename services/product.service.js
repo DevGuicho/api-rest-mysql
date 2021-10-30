@@ -1,65 +1,60 @@
-const faker = require('faker');
 const boom = require('@hapi/boom');
+const { Op } = require('sequelize');
+
+const { models } = require('../libs/sequelize');
 
 class ProductsService {
-  constructor() {
-    this.products = [];
-    this.generate();
-  }
+  constructor() {}
 
-  generate() {
-    const limit = 100;
-    for (let index = 0; index < limit; index++) {
-      this.products.push({
-        id: faker.datatype.uuid(),
-        name: faker.commerce.productName(),
-        price: parseInt(faker.commerce.price(), 10),
-        image: faker.image.imageUrl(),
-      });
+  async find(query) {
+    const options = {
+      include: ['category'],
+      where: {},
+    };
+    const { price, limit, offset, price_min, price_max } = query;
+    if (limit && offset) {
+      options.limit = Number(limit);
+      options.offset = Number(offset);
     }
-  }
+    if (price) {
+      options.where.price = price;
+    }
 
-  async find() {
-    return this.products;
+    if (price_min && price_max) {
+      options.where.price = {
+        [Op.gte]: price_min,
+        [Op.lte]: price_max,
+      };
+    }
+    const products = await models.Product.findAll(options);
+    return products;
   }
 
   async findOne(id) {
-    const product = this.products.find((product) => product.id === id);
+    const product = await models.Product.findByPk(id);
     if (!product) {
       throw boom.notFound('Product not found');
     }
     return product;
   }
 
-  async create(product) {
-    const newProduct = {
-      id: faker.datatype.uuid(),
-      ...product,
-    };
-    this.products.push(newProduct);
-    return newProduct;
+  async create(data) {
+    const product = await models.Product.create(data);
+    return product;
   }
 
-  async update(id, data) {
-    const index = this.products.findIndex((product) => product.id === id);
-    if (index === -1) {
-      throw boom.notFound('Product not found');
-    }
-    this.products[index] = {
-      ...this.products[index],
-      ...data,
-    };
+  async update(id, changes) {
+    const product = await this.findOne(id);
 
-    return this.products[index];
+    const productUpdated = await product.update(changes);
+
+    return productUpdated;
   }
 
   async delete(id) {
-    const index = this.products.findIndex((product) => product.id === id);
-    if (index === -1) {
-      throw boom.notFound('Product not found');
-    }
-    this.products.splice(index, 1);
-    return { id };
+    const product = await this.findOne(id);
+    await product.destroy();
+    return id;
   }
 }
 module.exports = ProductsService;

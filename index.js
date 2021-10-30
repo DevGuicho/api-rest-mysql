@@ -2,10 +2,12 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 
+const { port } = require('./config');
 const {
   errorHandler,
   logErrors,
   wrapErrors,
+  ormErrorHandler,
 } = require('./middlewares/error.handler');
 const routerApi = require('./routes');
 const notFoundHandler = require('./middlewares/notFound.handler');
@@ -19,10 +21,9 @@ routerApi(app);
 
 app.use(notFoundHandler);
 
-app.use(wrapErrors);
 app.use(logErrors);
+app.use(ormErrorHandler);
+app.use(wrapErrors);
 app.use(errorHandler);
 
-app.listen(process.env.PORT || 3000, () =>
-  console.log('Server running on port 3000')
-);
+app.listen(port, () => console.log(`Server running on port ${port}`));
