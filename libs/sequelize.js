@@ -7,8 +7,8 @@ const options = {
   dialect: isProd ? 'postgres' : 'mysql',
 };
 if (isProd) {
-  options.ssl = {
-    rejectUnauthorized: false,
+  options.dialectOptions = {
+    ssl: { rejectUnauthorized: false },
   };
   options.logging = false;
 }
